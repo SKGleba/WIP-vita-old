@@ -1,5 +1,4 @@
-TITLE_ID = SKGM4NF2G
-TARGET   = PSVDOWN
+TARGET   = PSVSAFE
 OBJS     = main.o
 
 LIBS = -lvita2d -lSceDisplay_stub -lSceNet_stub -lSceLibKernel_stub -lSceGxm_stub -lSceIofilemgr_stub \
@@ -11,11 +10,7 @@ CC      = $(PREFIX)-gcc
 CFLAGS  = -Wl,-q -Wall -fno-lto
 ASFLAGS = $(CFLAGS)
 
-all: $(TARGET).vpk
-
-%.vpk: eboot.bin
-	vita-mksfoex -s TITLE_ID=$(TITLE_ID) "Playstation Vita Downgrade Kit" param.sfo
-	vita-pack-vpk -s param.sfo -b eboot.bin $@
+all: eboot.bin
 
 eboot.bin: $(TARGET).velf
 	vita-make-fself -c $< $@
@@ -26,17 +21,6 @@ eboot.bin: $(TARGET).velf
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
-%.o: %.png
-	$(PREFIX)-ld -r -b binary -o $@ $^
-
 clean:
 	@rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf $(OBJS) \
 		eboot.bin param.sfo
-
-vpksend: $(TARGET).vpk
-	curl -T $(TARGET).vpk ftp://$(PSVITAIP):1337/ux0:/
-	@echo "Sent."
-
-send: eboot.bin
-	curl -T eboot.bin ftp://$(PSVITAIP):1337/ux0:/app/$(TITLE_ID)/
-	@echo "Sent."
